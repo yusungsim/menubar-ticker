@@ -28,12 +28,22 @@ static const CGFloat kScrollSpeedFastPointsPerSecond = 70.0;
     if (self) {
         self.font = font;
         _scrollSpeed = TickerScrollSpeedNormal;
+
+        // Status item subviews don't reliably receive
+        // -viewDidChangeEffectiveAppearance when the system Light/Dark
+        // setting changes, so fall back to the system notification
+        // that's long been the standard workaround for this.
+        [[NSDistributedNotificationCenter defaultCenter] addObserver:self
+                                                             selector:@selector(interfaceThemeDidChange:)
+                                                                 name:@"AppleInterfaceThemeChangedNotification"
+                                                               object:nil];
     }
     return self;
 }
 
 - (void)dealloc
 {
+    [[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:nil object:nil];
     [_scrollTimer invalidate];
     [_scrollTimer release];
     [_font release];
@@ -42,11 +52,25 @@ static const CGFloat kScrollSpeedFastPointsPerSecond = 70.0;
     [super dealloc];
 }
 
+- (void)interfaceThemeDidChange:(NSNotification *)notification
+{
+    [self setNeedsDisplay:YES];
+}
+
 - (NSView *)hitTest:(NSPoint)point
 {
     // Always pass clicks through to the status item button underneath,
     // so the existing click-to-open-menu behavior is untouched.
     return nil;
+}
+
+- (void)viewDidChangeEffectiveAppearance
+{
+    [super viewDidChangeEffectiveAppearance];
+    // drawRect: only re-resolves the dynamic system colors when it runs;
+    // without this, a static (non-scrolling) ticker keeps showing stale
+    // pixels from before a Light/Dark mode switch.
+    [self setNeedsDisplay:YES];
 }
 
 + (CGFloat)widthInPointsForCharacterCount:(NSInteger)characterCount font:(NSFont *)font

@@ -167,7 +167,26 @@ today). Verification will be manual, using the project's existing
    accommodate the new width, and text that now fits/overflows switches
    between static and scrolling correctly. Checkmark reflects the current
    selection and survives a relaunch.
-6. Clicking the status item still opens `statusMenu`; while open, text
-   inverts and the faint background is suppressed in favor of the native
-   highlight, matching pre-change look-and-feel for the highlighted state.
+6. Clicking the status item still opens `statusMenu`; while open, the
+   ticker draws its own accent-tinted highlight background
+   (`selectedContentBackgroundColor`) with contrasting text
+   (`alternateSelectedControlTextColor`) instead of the faint background —
+   this replaced the original plan of suppressing our background and
+   relying on the native highlight pill showing through, which didn't
+   give reliable contrast in Dark Mode during testing.
 7. Correct appearance in both Light and Dark mode.
+
+## Known issues
+
+- **Live Light/Dark toggle doesn't repaint the ticker.** `TickerView`
+  draws with dynamic system colors (`labelColor`, `quaternaryLabelColor`,
+  etc.), which should update automatically on an appearance change, and a
+  fallback listening for `AppleInterfaceThemeChangedNotification` was
+  added to force a redraw. In manual testing, neither this app's own
+  `-viewDidChangeEffectiveAppearance` nor the notification-based fallback
+  actually got the ticker to repaint when toggling System Settings >
+  Appearance while the app was already running — the colors correct
+  themselves on the next relaunch (i.e., a fresh draw picks up the right
+  appearance), but there's no reliable live-refresh signal being found yet
+  for a custom view living inside a status item's button. Deferred; not
+  blocking for this feature.
