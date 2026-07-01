@@ -1,5 +1,18 @@
 # menubar-ticker - Show the current song
 
+> **This is a fork** of the original
+> [serban/menubar-ticker](https://github.com/serban/menubar-ticker) with
+> additional features implemented by an LLM coding agent (Claude). Added
+> in v2.1.0:
+>
+> * A fixed-width menu bar display (with a faint background box) that no
+>   longer resizes — and shifts every other menu bar icon — every time the
+>   track changes
+> * Long track titles scroll ("flow") continuously instead of being cut
+>   off or resizing the item
+> * A "Scroll Speed" menu (Slow / Normal / Fast)
+> * A "Display Width" menu (Narrow / Normal / Wide)
+
 Menu Bar Ticker is a simple macOS menu bar item that displays the current artist
 and song playing in Music (aka
 [iTunes](https://support.apple.com/en-us/HT210200)) or Spotify.
