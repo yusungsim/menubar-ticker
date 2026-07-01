@@ -1,5 +1,8 @@
 # Fixed-Width Scrolling Ticker — Design
 
+_Update (same day): added a "Display Width" preset menu alongside "Scroll
+Speed" so the fixed width is adjustable at runtime, not just hardcoded._
+
 ## Problem
 
 `AppDelegate` currently sets `statusItem.button.title` directly to the
@@ -17,12 +20,13 @@ rather than being truncated.
 
 ## Non-goals
 
-- No preferences window. This app has none today and the only new
-  configurable value (scroll speed) fits as a small menu.
+- No preferences window. This app has none today, and the new configurable
+  values (scroll speed, display width) fit as small menus.
 - No change to polling/notification logic, Music/Spotify integration, or
-  the app's existing menu structure beyond adding the scroll-speed submenu.
-- No attempt to make the fixed width itself user-configurable — only scroll
-  speed is.
+  the app's existing menu structure beyond adding the two new submenus.
+- No arbitrary/custom width entry (e.g. a text-entry dialog) for now —
+  three presets only. Finer-grained control can be added later if it turns
+  out to be wanted.
 
 ## Architecture
 
@@ -46,7 +50,11 @@ Replace direct `button.title` assignment with a custom `NSView` subclass,
 
 ### TickerView responsibilities
 
-- **Fixed width**: given at init time, doesn't change afterward.
+- **Fixed width**: given at init time as a point value; can be changed
+  later at runtime via a `setFixedWidth:` call (see "Display Width" below).
+  Changing it resizes the view's frame and re-evaluates whether the current
+  `text` now fits or overflows (same logic as when `text` changes: reset
+  scroll offset, start/stop the timer accordingly).
 - **Background**: draws a faint, rounded-rect, gray fill behind the text
   at all times (idle, static-fit, and scrolling), adapting to light/dark
   mode via a semantic system color. Suppressed while `highlighted == YES`
@@ -81,21 +89,28 @@ Replace direct `button.title` assignment with a custom `NSView` subclass,
   above "Quit", each item toggling a checkmark and writing the choice to
   `NSUserDefaults`; on selection, update `tickerView.scrollSpeed`
   immediately.
-- Read the persisted scroll speed at launch (defaulting to Normal if unset)
-  and apply it before the first `updateTrackInfo` call.
+- Add a "Display Width" submenu (Narrow / Normal / Wide) the same way,
+  writing the chosen character count to `NSUserDefaults`; on selection,
+  recompute the pixel width from the button's font metrics, update
+  `statusItem.length` and call `tickerView.setFixedWidth:` with the new
+  value, applied immediately (no restart).
+- Read both persisted values at launch (defaulting to Normal/Normal if
+  unset) and apply them before the first `updateTrackInfo` call.
 - Set `self.statusMenu.delegate = self` and implement the two
   `NSMenuDelegate` methods described above.
 
 ## Concrete defaults
 
-- **Fixed width**: sized to fit **30 characters**, estimated as
-  `30 × (width of "0" in the status bar font)`, plus ~4pt padding on each
-  side to match the native inset other menu bar items have.
+- **Display width presets** (character count): Narrow = 20, Normal = 30,
+  Wide = 45. Default: Normal. Pixel width is estimated as
+  `characterCount × (width of "0" in the status bar font)`, plus ~4pt
+  padding on each side to match the native inset other menu bar items have.
+  Starting points to be confirmed/tuned by eye during manual testing.
 - **Gap between repeats while scrolling**: 6 spaces worth of width, in the
   same font.
 - **Scroll speed presets**: Slow = 20pt/s, Normal = 40pt/s, Fast = 70pt/s.
-  Default: Normal. These are starting points to be confirmed/tuned by eye
-  during manual testing, not hard requirements.
+  Default: Normal. Starting points to be confirmed/tuned by eye during
+  manual testing, not hard requirements.
 - **Background fill**: faint, semantic gray (e.g. `NSColor.quaternaryLabelColor`
   or similar low-contrast system color, chosen so it works in both
   appearances), rounded-rect with a small corner radius (e.g. 4pt).
@@ -115,10 +130,15 @@ notifications ───────┘
 10s polling timer), started/stopped based on whether the current `text`
 overflows the fixed width.
 
-Scroll-speed menu selection is a separate, independent data path:
+Scroll-speed and display-width menu selections are separate, independent
+data paths:
 
 ```
-User picks menu item ─> NSUserDefaults write ─> tickerView.scrollSpeed = preset
+User picks Scroll Speed item ─> NSUserDefaults write ─> tickerView.scrollSpeed = preset
+
+User picks Display Width item ─> NSUserDefaults write ─> recompute pixel width
+                                  ─> statusItem.length = newWidth
+                                  ─> tickerView.setFixedWidth:(newWidth)
 ```
 
 ## Error handling
@@ -142,7 +162,12 @@ today). Verification will be manual, using the project's existing
 4. Changing "Scroll Speed" takes effect immediately on an in-progress
    scroll, and the checkmark reflects the current selection and survives
    a relaunch.
-5. Clicking the status item still opens `statusMenu`; while open, text
+5. Changing "Display Width" resizes the menu bar item immediately (no
+   restart, no track change needed), other menu bar items shift to
+   accommodate the new width, and text that now fits/overflows switches
+   between static and scrolling correctly. Checkmark reflects the current
+   selection and survives a relaunch.
+6. Clicking the status item still opens `statusMenu`; while open, text
    inverts and the faint background is suppressed in favor of the native
    highlight, matching pre-change look-and-feel for the highlighted state.
-6. Correct appearance in both Light and Dark mode.
+7. Correct appearance in both Light and Dark mode.
