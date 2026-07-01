@@ -5,9 +5,12 @@
 #import "TickerView.h"
 
 const NSTimeInterval kPollingInterval = 10.0;
+static NSString * const kScrollSpeedDefaultsKey = @"TickerScrollSpeed";
 
 
 @interface AppDelegate () <NSMenuDelegate>
+
+@property (nonatomic, retain) NSArray<NSMenuItem *> *scrollSpeedMenuItems;
 
 @property (nonatomic, retain) MusicApplication *music;
 @property (nonatomic, retain) SpotifyApplication *spotify;
@@ -38,6 +41,7 @@ const NSTimeInterval kPollingInterval = 10.0;
     self.statusItem = nil;
     self.statusMenu = nil;
     self.tickerView = nil;
+    self.scrollSpeedMenuItems = nil;
 
     [self.timer invalidate];
     self.timer = nil;
@@ -93,6 +97,13 @@ const NSTimeInterval kPollingInterval = 10.0;
 
     self.statusItem.length = self.tickerView.fixedWidth;
 
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    TickerScrollSpeed initialScrollSpeed = [defaults objectForKey:kScrollSpeedDefaultsKey]
+        ? (TickerScrollSpeed)[defaults integerForKey:kScrollSpeedDefaultsKey]
+        : TickerScrollSpeedNormal;
+    self.tickerView.scrollSpeed = initialScrollSpeed;
+    [self configureScrollSpeedMenu];
+
     [self updateTrackInfo];
 }
 
@@ -134,6 +145,51 @@ const NSTimeInterval kPollingInterval = 10.0;
     if (menu == self.statusMenu) {
         self.tickerView.highlighted = NO;
     }
+}
+
+- (void)configureScrollSpeedMenu
+{
+    NSMenuItem *slowItem = [[[NSMenuItem alloc] initWithTitle:@"Slow" action:@selector(selectScrollSpeed:) keyEquivalent:@""] autorelease];
+    slowItem.target = self;
+    slowItem.tag = TickerScrollSpeedSlow;
+
+    NSMenuItem *normalItem = [[[NSMenuItem alloc] initWithTitle:@"Normal" action:@selector(selectScrollSpeed:) keyEquivalent:@""] autorelease];
+    normalItem.target = self;
+    normalItem.tag = TickerScrollSpeedNormal;
+
+    NSMenuItem *fastItem = [[[NSMenuItem alloc] initWithTitle:@"Fast" action:@selector(selectScrollSpeed:) keyEquivalent:@""] autorelease];
+    fastItem.target = self;
+    fastItem.tag = TickerScrollSpeedFast;
+
+    self.scrollSpeedMenuItems = @[slowItem, normalItem, fastItem];
+
+    NSMenu *scrollSpeedSubmenu = [[[NSMenu alloc] initWithTitle:@"Scroll Speed"] autorelease];
+    for (NSMenuItem *item in self.scrollSpeedMenuItems) {
+        [scrollSpeedSubmenu addItem:item];
+    }
+
+    NSMenuItem *scrollSpeedParentItem = [[[NSMenuItem alloc] initWithTitle:@"Scroll Speed" action:nil keyEquivalent:@""] autorelease];
+    scrollSpeedParentItem.submenu = scrollSpeedSubmenu;
+
+    [self.statusMenu insertItem:[NSMenuItem separatorItem] atIndex:0];
+    [self.statusMenu insertItem:scrollSpeedParentItem atIndex:0];
+
+    [self updateScrollSpeedMenuCheckmarks];
+}
+
+- (void)updateScrollSpeedMenuCheckmarks
+{
+    for (NSMenuItem *item in self.scrollSpeedMenuItems) {
+        item.state = (item.tag == self.tickerView.scrollSpeed) ? NSControlStateValueOn : NSControlStateValueOff;
+    }
+}
+
+- (void)selectScrollSpeed:(NSMenuItem *)sender
+{
+    TickerScrollSpeed speed = (TickerScrollSpeed)sender.tag;
+    self.tickerView.scrollSpeed = speed;
+    [[NSUserDefaults standardUserDefaults] setInteger:speed forKey:kScrollSpeedDefaultsKey];
+    [self updateScrollSpeedMenuCheckmarks];
 }
 
 @end
