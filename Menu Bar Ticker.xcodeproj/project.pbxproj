@@ -12,6 +12,7 @@
 		4CC719EE157C1FD7008976AD /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CC719ED157C1FD7008976AD /* main.m */; };
 		4CC719F2157C1FD7008976AD /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 4CC719F0157C1FD7008976AD /* Credits.rtf */; };
 		4CC719F5157C1FD7008976AD /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CC719F4157C1FD7008976AD /* AppDelegate.m */; };
+		4B9859C16F054B8180035ABB /* TickerView.m in Sources */ = {isa = PBXBuildFile; fileRef = A6F6A24CF1BC4FDDBAA7C860 /* TickerView.m */; };
 		4CC719F8157C1FD7008976AD /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4CC719F6157C1FD7008976AD /* MainMenu.xib */; };
 		4CC71A17157C2A59008976AD /* ScriptingBridge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CC71A16157C2A59008976AD /* ScriptingBridge.framework */; };
 /* End PBXBuildFile section */
@@ -30,6 +31,8 @@
 		4CC719F1157C1FD7008976AD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
 		4CC719F3157C1FD7008976AD /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		4CC719F4157C1FD7008976AD /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		D86E0CD16E744073ADF9C61E /* TickerView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TickerView.h; sourceTree = "<group>"; };
+		A6F6A24CF1BC4FDDBAA7C860 /* TickerView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TickerView.m; sourceTree = "<group>"; };
 		4CC71A16157C2A59008976AD /* ScriptingBridge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ScriptingBridge.framework; path = System/Library/Frameworks/ScriptingBridge.framework; sourceTree = SDKROOT; };
 		4CC71A18157C398E008976AD /* Spotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Spotify.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,6 +92,8 @@
 			children = (
 				4CC719F3157C1FD7008976AD /* AppDelegate.h */,
 				4CC719F4157C1FD7008976AD /* AppDelegate.m */,
+				D86E0CD16E744073ADF9C61E /* TickerView.h */,
+				A6F6A24CF1BC4FDDBAA7C860 /* TickerView.m */,
 				0005E3B923DE30AE002FC513 /* Music.h */,
 				4CC71A18157C398E008976AD /* Spotify.h */,
 				4CC719F6157C1FD7008976AD /* MainMenu.xib */,
@@ -175,6 +180,7 @@
 			files = (
 				4CC719EE157C1FD7008976AD /* main.m in Sources */,
 				4CC719F5157C1FD7008976AD /* AppDelegate.m in Sources */,
+				4B9859C16F054B8180035ABB /* TickerView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
