@@ -54,6 +54,14 @@ This project lives at [GitHub](https://github.com/serban/menubar-ticker).
 Version numbers follow the [Semantic Versioning](https://semver.org)
 specification.
 
+### v2.1.0
+
+* Show the menu bar item at a fixed width at all times (idle or playing),
+  with a faint background box, instead of resizing with the track title
+* Scroll ("flow") track text that's too long to fit, looping continuously
+* Add a "Scroll Speed" menu (Slow/Normal/Fast)
+* Add a "Display Width" menu (Narrow/Normal/Wide)
+
 ### v2.0.0
 
 * Add support for Apple Silicon
