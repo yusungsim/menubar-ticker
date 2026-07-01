@@ -7,7 +7,7 @@
 const NSTimeInterval kPollingInterval = 10.0;
 
 
-@interface AppDelegate ()
+@interface AppDelegate () <NSMenuDelegate>
 
 @property (nonatomic, retain) MusicApplication *music;
 @property (nonatomic, retain) SpotifyApplication *spotify;
@@ -78,6 +78,7 @@ const NSTimeInterval kPollingInterval = 10.0;
     
     self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     self.statusItem.menu = self.statusMenu;
+    self.statusItem.menu.delegate = self;
     self.statusItem.button.toolTip = @"Menu Bar Ticker";
     self.statusItem.button.title = @"";
 
@@ -119,6 +120,20 @@ const NSTimeInterval kPollingInterval = 10.0;
 - (void)didReceivePlayerNotification:(NSNotification *)notification
 {
     [self updateTrackInfo];
+}
+
+- (void)menuWillOpen:(NSMenu *)menu
+{
+    if (menu == self.statusMenu) {
+        self.tickerView.highlighted = YES;
+    }
+}
+
+- (void)menuDidClose:(NSMenu *)menu
+{
+    if (menu == self.statusMenu) {
+        self.tickerView.highlighted = NO;
+    }
 }
 
 @end

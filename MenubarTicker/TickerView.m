@@ -151,15 +151,14 @@ static const CGFloat kScrollSpeedFastPointsPerSecond = 70.0;
 {
     [super drawRect:dirtyRect];
 
-    if (!self.highlighted) {
-        NSBezierPath *backgroundPath = [NSBezierPath bezierPathWithRoundedRect:self.bounds
-                                                                        xRadius:kTickerCornerRadius
-                                                                        yRadius:kTickerCornerRadius];
-        [[NSColor quaternaryLabelColor] setFill];
-        [backgroundPath fill];
-    }
+    NSBezierPath *backgroundPath = [NSBezierPath bezierPathWithRoundedRect:self.bounds
+                                                                    xRadius:kTickerCornerRadius
+                                                                    yRadius:kTickerCornerRadius];
+    NSColor *backgroundColor = self.highlighted ? [NSColor selectedContentBackgroundColor] : [NSColor quaternaryLabelColor];
+    [backgroundColor setFill];
+    [backgroundPath fill];
 
-    NSColor *textColor = self.highlighted ? [NSColor selectedMenuItemTextColor] : [NSColor labelColor];
+    NSColor *textColor = self.highlighted ? [NSColor alternateSelectedControlTextColor] : [NSColor labelColor];
     NSDictionary *attributes = @{
         NSFontAttributeName: self.font,
         NSForegroundColorAttributeName: textColor,
