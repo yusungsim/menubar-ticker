@@ -6,11 +6,17 @@
 
 const NSTimeInterval kPollingInterval = 10.0;
 static NSString * const kScrollSpeedDefaultsKey = @"TickerScrollSpeed";
+static NSString * const kDisplayWidthDefaultsKey = @"TickerDisplayWidthCharacters";
+static const NSInteger kDisplayWidthNarrowCharacters = 20;
+static const NSInteger kDisplayWidthNormalCharacters = 30;
+static const NSInteger kDisplayWidthWideCharacters = 45;
 
 
 @interface AppDelegate () <NSMenuDelegate>
 
 @property (nonatomic, retain) NSArray<NSMenuItem *> *scrollSpeedMenuItems;
+@property (nonatomic, retain) NSArray<NSMenuItem *> *displayWidthMenuItems;
+@property (nonatomic, assign) NSInteger currentDisplayWidthCharacters;
 
 @property (nonatomic, retain) MusicApplication *music;
 @property (nonatomic, retain) SpotifyApplication *spotify;
@@ -42,6 +48,7 @@ static NSString * const kScrollSpeedDefaultsKey = @"TickerScrollSpeed";
     self.statusMenu = nil;
     self.tickerView = nil;
     self.scrollSpeedMenuItems = nil;
+    self.displayWidthMenuItems = nil;
 
     [self.timer invalidate];
     self.timer = nil;
@@ -86,9 +93,14 @@ static NSString * const kScrollSpeedDefaultsKey = @"TickerScrollSpeed";
     self.statusItem.button.toolTip = @"Menu Bar Ticker";
     self.statusItem.button.title = @"";
 
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    self.currentDisplayWidthCharacters = [defaults objectForKey:kDisplayWidthDefaultsKey]
+        ? [defaults integerForKey:kDisplayWidthDefaultsKey]
+        : kDisplayWidthNormalCharacters;
+
     NSFont *tickerFont = [NSFont menuBarFontOfSize:0];
     self.tickerView = [[[TickerView alloc] initWithFont:tickerFont] autorelease];
-    [self.tickerView setFixedWidthInCharacters:30];
+    [self.tickerView setFixedWidthInCharacters:self.currentDisplayWidthCharacters];
 
     NSRect tickerFrame = NSMakeRect(0, 0, self.tickerView.fixedWidth, self.statusItem.button.bounds.size.height);
     self.tickerView.frame = tickerFrame;
@@ -97,12 +109,12 @@ static NSString * const kScrollSpeedDefaultsKey = @"TickerScrollSpeed";
 
     self.statusItem.length = self.tickerView.fixedWidth;
 
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     TickerScrollSpeed initialScrollSpeed = [defaults objectForKey:kScrollSpeedDefaultsKey]
         ? (TickerScrollSpeed)[defaults integerForKey:kScrollSpeedDefaultsKey]
         : TickerScrollSpeedNormal;
     self.tickerView.scrollSpeed = initialScrollSpeed;
     [self configureScrollSpeedMenu];
+    [self configureDisplayWidthMenu];
 
     [self updateTrackInfo];
 }
@@ -190,6 +202,52 @@ static NSString * const kScrollSpeedDefaultsKey = @"TickerScrollSpeed";
     self.tickerView.scrollSpeed = speed;
     [[NSUserDefaults standardUserDefaults] setInteger:speed forKey:kScrollSpeedDefaultsKey];
     [self updateScrollSpeedMenuCheckmarks];
+}
+
+- (void)configureDisplayWidthMenu
+{
+    NSMenuItem *narrowItem = [[[NSMenuItem alloc] initWithTitle:@"Narrow" action:@selector(selectDisplayWidth:) keyEquivalent:@""] autorelease];
+    narrowItem.target = self;
+    narrowItem.tag = kDisplayWidthNarrowCharacters;
+
+    NSMenuItem *normalItem = [[[NSMenuItem alloc] initWithTitle:@"Normal" action:@selector(selectDisplayWidth:) keyEquivalent:@""] autorelease];
+    normalItem.target = self;
+    normalItem.tag = kDisplayWidthNormalCharacters;
+
+    NSMenuItem *wideItem = [[[NSMenuItem alloc] initWithTitle:@"Wide" action:@selector(selectDisplayWidth:) keyEquivalent:@""] autorelease];
+    wideItem.target = self;
+    wideItem.tag = kDisplayWidthWideCharacters;
+
+    self.displayWidthMenuItems = @[narrowItem, normalItem, wideItem];
+
+    NSMenu *displayWidthSubmenu = [[[NSMenu alloc] initWithTitle:@"Display Width"] autorelease];
+    for (NSMenuItem *item in self.displayWidthMenuItems) {
+        [displayWidthSubmenu addItem:item];
+    }
+
+    NSMenuItem *displayWidthParentItem = [[[NSMenuItem alloc] initWithTitle:@"Display Width" action:nil keyEquivalent:@""] autorelease];
+    displayWidthParentItem.submenu = displayWidthSubmenu;
+
+    [self.statusMenu insertItem:displayWidthParentItem atIndex:0];
+
+    [self updateDisplayWidthMenuCheckmarks];
+}
+
+- (void)updateDisplayWidthMenuCheckmarks
+{
+    for (NSMenuItem *item in self.displayWidthMenuItems) {
+        item.state = (item.tag == self.currentDisplayWidthCharacters) ? NSControlStateValueOn : NSControlStateValueOff;
+    }
+}
+
+- (void)selectDisplayWidth:(NSMenuItem *)sender
+{
+    NSInteger characterCount = sender.tag;
+    [self.tickerView setFixedWidthInCharacters:characterCount];
+    self.statusItem.length = self.tickerView.fixedWidth;
+    self.currentDisplayWidthCharacters = characterCount;
+    [[NSUserDefaults standardUserDefaults] setInteger:characterCount forKey:kDisplayWidthDefaultsKey];
+    [self updateDisplayWidthMenuCheckmarks];
 }
 
 @end
